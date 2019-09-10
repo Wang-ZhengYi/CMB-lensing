@@ -25,7 +25,7 @@ lens_map_data = np.zeros(shape=(lens_sides,lens_sides),dtype='float')
 
 for i in range(lens_sides):
 	for j in range(lens_sides):
-			lens_map_data[i,j] = magnif*1/(sqrt(((i-half_lens_side-0.5)*h_0)**2+((j-half_lens_side-0.5)*h_0)**2)+t)**p
+			lens_map_data[i,j] = magnif*1/((sqrt(((i-half_lens_side-0.5)*h_0)**2+((j-half_lens_side-0.5)*h_0)**2))**p+t)
 #Assign value to matrix lens_map_data
 
 
