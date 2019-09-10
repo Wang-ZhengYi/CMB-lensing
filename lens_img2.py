@@ -35,7 +35,7 @@ unlensed_spectra = np.loadtxt(unlensed_spectra_filename)
 ell = np.zeros(unlensed_spectra.shape[0])
 TT_unlensed = np.zeros(unlensed_spectra.shape[0])
 ell[0:len(ell)] = unlensed_spectra[:,0]
-TT_unlensed[0:len(ell)] = unlensed_spectra[:,4]/unlensed_spectra[:,0]/(unlensed_spectra[:,0]+1)*2.0*np.pi
+TT_unlensed[0:len(ell)] = unlensed_spectra[:,1]/unlensed_spectra[:,0]/(unlensed_spectra[:,0]+1)*2.0*np.pi
 np.savetxt('try1.dat', np.c_[ell,TT_unlensed], fmt='%1.4e')
 
 #pixelization setup
@@ -73,7 +73,7 @@ imaginary_part = np.sqrt(0.5*Pl) * np.random.normal(loc=0.0,scale=1.0,size=l.sha
 
 #Get map in real space and return
 #bh: not sure about the scaling factor: l.shape[0]**2
-ft_map = (real_part + imaginary_part*1.0j)*0.003
+ft_map = (real_part + imaginary_part*1.0j)*0.05
 #print(ft_map.shape)
 
 #ft_map is a (N,N/2+1) complex matrix, noise_map is a (N,N) matrix
