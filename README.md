@@ -10,5 +10,5 @@
 
 3. run [dif_matrix.py](dif_matrix.py) , which produce a matrix of computing 2d gradient. 
 
-3. run [mixing.py]mixing.py, which produces the lensed CMB map. 
+3. run [mixing.py](mixing.py), which produces the lensed CMB map. 
 
