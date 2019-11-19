@@ -14,7 +14,9 @@
 
 Unlensed CMB map:
 ![avatar](map.png)
+
 lensing map
 ![avatar](lens_map.png)
+
 Lensed CMB map
 ![avatar](lensed_cmb_map.png)
