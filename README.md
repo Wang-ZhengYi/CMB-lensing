@@ -12,3 +12,9 @@
 
 3. run [mixing.py](mixing.py), which produces the lensed CMB map. 
 
+Unlensed CMB map:
+![avatar](map.png)
+lensing map
+![avatar](lens_map.png)
+Lensed CMB map
+![avatar](lensed_cmb_map.png)
