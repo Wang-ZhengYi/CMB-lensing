@@ -13,15 +13,16 @@ import matplotlib.pyplot as plt
 from matplotlib import cm
 from scipy import interpolate
 #from pylab import *
+#import astropy.units as u
 
-
+##-----------------parameter setting--------------------##
 magnif_pixel = 4
 #line resolution for lensing potential map is N/magnif_pixel when line resolution for cmb map is N
 cmb_map_sides = 1024
 #number of pixel
 lens_sides = 256
 #field degree (have to be a squared field)
-field_deg = 20.0
+field_deg = 20.0 #u.deg
 #lensing amplitude magnification factor
 magnif = 1.5e-5
 #factor of scals
@@ -86,4 +87,5 @@ plt.colorbar()
 #plt.show()
 plt.savefig('lensed_cmb_map.png')
 #print lensed cmb map
+
 exit()
