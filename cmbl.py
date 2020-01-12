@@ -13,8 +13,16 @@ import healpy as hp
 from scipy import interpolate
 import camb
 import math
-
+import gravipy
+import astropy
  
+
+def coord(xsides,ysides):
+	x = np.arange(xsides)
+	y = np.arange(ysides)
+	coordm = np.zeros(shape=(x.shape[0],y.shape[0]),dtype='complex')
+	coordm = x[np.newaxis,:] + y[:,np.newaxis]*1.0j
+	return coordm,x,y
 
 
 def border(x,N):
@@ -23,6 +31,15 @@ def border(x,N):
 	less = (x<0)
 	return x-N*more+N*less
 
+def diffmat(N):
+	di_e = np.array([-1.,-8.,0.,8.,1.])/12.0
+	M = np.zeros(shape=(N,N),dtype='float')
+
+	for j in range(len(di_e)):
+		for i in range(N):
+			M[i,border(i-len(di_e)//2+j,N)] = di_e[j]*N
+
+	return M
 
 class lens(object):
 	"""docstring for lens"""
@@ -31,21 +48,10 @@ class lens(object):
 		self.arg = arg
 
 	def der1(maps,field):
-		field = field*np.pi/180
-		Rm = np.zeros(shape=(maps.shape[0],maps.shape[0]),dtype='float')#row of the matrix
-		Wm = np.zeros(shape=(maps.shape[1],maps.shape[1]),dtype='float')#width of the matrix
-
-		di_e = np.array([-1.,-8.,0.,8.,1.])/12.0
-		for j in range(len(di_e)):
-			for i in range(maps.shape[0]):
-				Rm[i,border(i-len(di_e)//2+j,maps.shape[0])] = di_e[j]
-			for k in range(maps.shape[1]):
-				Wm[k,border(k-len(di_e)//2+j,maps.shape[1])] = di_e[j]
-
-		Rm = Rm/field[0]
-		Wm = Wm/field[1]
-		X = -1*np.dot(Rm,maps)*maps.shape[0]
-		Y = np.dot(maps,Wm)*maps.shape[1]
+		Rm = diffmat(maps.shape[0])/field[0]
+		Wm = diffmat(maps.shape[1])/field[1]
+		X = np.dot(maps,Rm)
+		Y = -1*np.dot(Wm,maps)
 		return X,Y
 
 	def der2(maps,field):
@@ -59,22 +65,25 @@ class lens(object):
 		cmb_x,cmb_y = lens.der1(cmb,field)
 		phi_x,phi_y = lens.der1(phi,field)
 		cmb_xx,cmb_yy,cmb_xy,cmb_yx = lens.der2(cmb,field)
-		lensedmap = cmb + (cmb_x*phi_x + cmb_y*phi_y) + 0.5*(cmb_xx*phi_x**2+cmb_yy*phi_y**2+cmb_xy*phi_y*phi_x+cmb_yx*phi_y*phi_x)
-		return lensedmap
+		cmbl = cmb + (cmb_x*phi_x + cmb_y*phi_y) + 0.5*(cmb_xx*phi_x**2+cmb_yy*phi_y**2+cmb_xy*phi_y*phi_x+cmb_yx*phi_y*phi_x)
+		return cmbl
 
 	def flat_lens(cmb,phi,field):
-		size0 = np.shape(cmb)
-		xn , yn = size0
-		xx = np.arange(xn)
-		yy = np.arange(yn)
-		zz = np.transpose(cmb)
+		coordm,xx,yy = coord(cmb.shape[0],cmb.shape[1])
+		zz = cmb
 		phi_x,phi_y = lens.der1(phi,field)
 		interped_cmb = interpolate.interp2d(xx, yy, zz, kind='cubic')
-
+		coordm = coordm -phi_x - phi_y*1.0j
+		x,y = np.meshgrid(xx,yy)
 		for i in range(cmb.shape[0]):
 			for j in range(cmb.shape[1]):				
-				cmb[i,j] = interped_cmb(i-phi_x[i,j],j-phi_y[i,j])
-		return cmb
+				cmb[i,j] = interped_cmb(coordm[i,j].imag,coordm[i,j].real)
+		return cmb 
+
+	def flat_lens_sb(cmb,phi,field):
+		cmbk = np.fft.fft2(cmb)/cmb.shape[0]
+		return cmbk
+
 
 	def curvelens(cmb,phi,nside):
 		alm_cmb = hp.map2alm(cmb)
@@ -84,6 +93,8 @@ class lens(object):
 		lensedmap = cmb + grad_alm_phi*grad_alm_cmb
 		return lensedmap
 
+	# def curve_lens(cmb,phi,nside):
+		
 
 
 magnif = 1e-5
@@ -101,7 +112,7 @@ fieldeg = np.array([20.,20.])
 
 if __name__ == '__main__':
 	# lx,ly = lens.der1(phi_0,fieldeg)
-	a = lens.flatlens(cmb_0,phi_0,fieldeg)
+	a = lens.flat_lens(cmb_0,phi_0,fieldeg)
 	plt.imshow(a,
 		cmap='bwr',
 		 # vmin=0,vmax=8000
@@ -109,6 +120,6 @@ if __name__ == '__main__':
 	plt.axis('on')
 	plt.colorbar()
 	
-	# plt.savefig('lensed_cmb_map111.png',dpi=600)
+	# plt.savefig('cmbl1.png',dpi=600)
 	plt.show()
 	exit()
